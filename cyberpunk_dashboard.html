@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<h2>> 4-WAY_CAMERA_FEED</h2>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER-GRID INTERSECTION</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <h1>> NEO-TRAFFIC AI CORE v9.0</h1>
+
+    <div class="dashboard">
+
+        <!-- UPDATED: 4-Way Video Upload System -->
+        <div class="panel" id="video-grid-panel" style="grid-column: 1 / -1;">
+            <div class="video-grid">
+                <!-- SW -->
+                <div class="video-card">
+                    <h3>South-West (SW) Feed</h3>
+                    <input type="file" id="upload-sw" accept="video/*" onchange="handleVideoUpload('sw', this)">
+                    <video id="video-sw" controls autoplay muted loop style="display:none;"></video>
+                    <div id="loading-sw" class="loading-state" style="display:none;">[ PROCESSING AI... ]</div>
+                    <div class="detection-results" id="results-sw" style="display:none;">
+                        <div class="v-count">🚗 Vehicles: <span id="count-sw">0</span></div>
+                        <div class="e-alert" id="alert-sw" style="display:none;">🚨 EMERGENCY OVERRIDE!</div>
+                    </div>
+                </div>
+                <!-- NW -->
+                <div class="video-card">
+                    <h3>North-West (NW) Feed</h3>
+                    <input type="file" id="upload-nw" accept="video/*" onchange="handleVideoUpload('nw', this)">
+                    <video id="video-nw" controls autoplay muted loop style="display:none;"></video>
+                    <div id="loading-nw" class="loading-state" style="display:none;">[ PROCESSING AI... ]</div>
+                    <div class="detection-results" id="results-nw" style="display:none;">
+                        <div class="v-count">🚗 Vehicles: <span id="count-nw">0</span></div>
+                        <div class="e-alert" id="alert-nw" style="display:none;">🚨 EMERGENCY OVERRIDE!</div>
+                    </div>
+                </div>
+                <!-- NE -->
+                <div class="video-card">
+                    <h3>North-East (NE) Feed</h3>
+                    <input type="file" id="upload-ne" accept="video/*" onchange="handleVideoUpload('ne', this)">
+                    <video id="video-ne" controls autoplay muted loop style="display:none;"></video>
+                    <div id="loading-ne" class="loading-state" style="display:none;">[ PROCESSING AI... ]</div>
+                    <div class="detection-results" id="results-ne" style="display:none;">
+                        <div class="v-count">🚗 Vehicles: <span id="count-ne">0</span></div>
+                        <div class="e-alert" id="alert-ne" style="display:none;">🚨 EMERGENCY OVERRIDE!</div>
+                    </div>
+                </div>
+                <!-- SE -->
+                <div class="video-card">
+                    <h3>South-East (SE) Feed</h3>
+                    <input type="file" id="upload-se" accept="video/*" onchange="handleVideoUpload('se', this)">
+                    <video id="video-se" controls autoplay muted loop style="display:none;"></video>
+                    <div id="loading-se" class="loading-state" style="display:none;">[ PROCESSING AI... ]</div>
+                    <div class="detection-results" id="results-se" style="display:none;">
+                        <div class="v-count">🚗 Vehicles: <span id="count-se">0</span></div>
+                        <div class="e-alert" id="alert-se" style="display:none;">🚨 EMERGENCY OVERRIDE!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>> SIGNAL_MATRIX</h2>
+            <div class="lights-container">
+                <div class="traffic-light-box">
+                    <span class="label">NORTH-SOUTH</span>
+                    <div class="bulb red" id="ns-red"></div>
+                    <div class="bulb yellow" id="ns-yellow"></div>
+                    <div class="bulb green on" id="ns-green"></div>
+                </div>
+                <div class="traffic-light-box">
+                    <span class="label">EAST-WEST</span>
+                    <div class="bulb red on" id="ew-red"></div>
+                    <div class="bulb yellow" id="ew-yellow"></div>
+                    <div class="bulb green" id="ew-green"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel emergency-panel" id="emerg-panel">
+            <h2>> PRIORITY_OVERRIDE_SYS</h2>
+            <div class="label" style="color: var(--neon-red);">> AUDIO SPECTRUM: METRO SIREN DB_SPIKE</div>
+            <div class="alert-text">! AMBULANCE DETECTED !<br>HALTING NORMAL FLOW</div>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+            <h2>> TRAFFIC_FLOW_ANALYSIS</h2>
+            <div class="chart-container">
+                <canvas id="trafficChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

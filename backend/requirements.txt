@@ -1,0 +1,8 @@
+Flask==3.0.3
+Flask-SocketIO==5.3.6
+Flask-Cors==4.0.0
+opencv-python==4.9.0.80
+ultralytics==8.2.0
+eventlet==0.35.2
+python-socketio==5.11.2
+requests==2.32.3

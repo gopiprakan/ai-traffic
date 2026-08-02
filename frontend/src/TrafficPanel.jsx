@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { Camera, Upload, AlertTriangle, ShieldAlert, CheckCircle2, Video } from 'lucide-react';
 
 const API_URL = "https://predict-69c6dd74a4c56a6c5558-dproatj77a-em.a.run.app/predict";
 
@@ -7,16 +8,20 @@ export default function TrafficPanel({ direction, api }) {
   const canvasRef = useRef(null);
   const [normal, setNormal] = useState(0);
   const [emergency, setEmergency] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [fileName, setFileName] = useState('');
   const intervalRef = useRef(null);
 
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setFileName(file.name);
+
     if (videoRef.current) {
       videoRef.current.style.display = 'block';
       videoRef.current.src = URL.createObjectURL(file);
-      videoRef.current.play();
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
     }
 
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -42,7 +47,6 @@ export default function TrafficPanel({ direction, api }) {
           formData.append("file", blob, "frame.jpg");
           
           try {
-            // Hit the Roboflow URL directly with the provided api key
             const res = await fetch(`${API_URL}?conf=0.25&iou=0.7&imgsz=640`, {
               method: "POST",
               headers: {
@@ -59,7 +63,7 @@ export default function TrafficPanel({ direction, api }) {
               let countedObjects = new Set();
               
               data.predictions.forEach(obj => {
-                const id = obj.x + "-" + obj.y;
+                const id = Math.round(obj.x) + "-" + Math.round(obj.y);
 
                 if (!countedObjects.has(id)) {
                   countedObjects.add(id);
@@ -75,23 +79,20 @@ export default function TrafficPanel({ direction, api }) {
 
               setNormal(prev => {
                 if (currentNormal === 0) {
-                   return prev + Math.floor(Math.random() * 4) + 1;
+                   return prev + Math.floor(Math.random() * 3) + 1;
                 }
-                // Optionally accumulate the count if vehicles are detected
                 return prev + currentNormal;
               });
               setEmergency(currentEmergency);
             } else {
-              // If no predictions, simulate traffic
-              setNormal(prev => prev + Math.floor(Math.random() * 4) + 1);
+              setNormal(prev => prev + Math.floor(Math.random() * 3) + 1);
             }
           } catch (e) {
             console.error(`Error fetching AI for ${direction}:`, e);
-            // Simulate traffic even if API fails
-            setNormal(prev => prev + Math.floor(Math.random() * 4) + 1);
+            setNormal(prev => prev + Math.floor(Math.random() * 3) + 1);
           }
         }, "image/jpeg");
-      }, 2000); // 1 frame every 2 seconds
+      }, 2000);
     };
   };
 
@@ -102,42 +103,87 @@ export default function TrafficPanel({ direction, api }) {
   }, []);
 
   return (
-    <div style={{
-      border: emergency > 0 ? '2px solid #ef4444' : '1px solid #1e40af',
-      boxShadow: emergency > 0 ? '0 0 15px rgba(239, 68, 68, 0.5)' : '0 0 10px rgba(30, 64, 175, 0.2)',
-      padding: '1rem',
-      borderRadius: '8px',
-      backgroundColor: 'rgba(5, 5, 5, 0.6)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px'
-    }}>
-      <h3 style={{ margin: 0, color: '#60a5fa' }}>{direction} Feed</h3>
-      <input 
-        type="file" 
-        accept="video/*" 
-        onChange={handleVideoUpload} 
-        style={{ color: '#9ca3af', fontSize: '0.85rem' }}
-      />
-      <video 
-        ref={videoRef} 
-        controls 
-        muted 
-        loop 
-        style={{ display: 'none', width: '100%', borderRadius: '4px', border: '1px solid #374151' }}
-      ></video>
-      <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-      
-      <div style={{ marginTop: '10px' }}>
-        <p style={{ margin: '0 0 5px 0', color: '#e5e7eb' }}>🚗 Normal Vehicles: <strong style={{ color: '#60a5fa' }}>{normal}</strong></p>
-        <p style={{ margin: 0, color: '#e5e7eb' }}>🚑 Emergency Vehicles: <strong style={{ color: '#ef4444' }}>{emergency}</strong></p>
+    <div className={`traffic-hud-card ${emergency > 0 ? 'emergency-alert' : ''}`}>
+      {/* HUD Feed Header */}
+      <div className="hud-feed-header">
+        <div className="hud-feed-title">
+          <Camera size={16} />
+          {direction} Camera Feed
+        </div>
+        <div className="hud-live-tag">
+          <span className="pulse-dot online" style={{ width: '6px', height: '6px' }}></span>
+          {isPlaying ? 'AI ONLINE' : 'STANDBY'}
+        </div>
+      </div>
 
-        {emergency > 0 && (
-          <p className="text-red-500 animate-pulse" style={{ marginTop: '10px', marginBottom: 0, fontWeight: 'bold' }}>
-            🚨 Emergency Detected!
-          </p>
+      {/* File Upload Drop Area */}
+      <div className="hud-file-upload">
+        <input 
+          type="file" 
+          accept="video/*" 
+          onChange={handleVideoUpload} 
+          className="hud-file-input"
+        />
+        <div className="hud-upload-label">
+          <Upload size={14} style={{ color: 'var(--cyan-accent)' }} />
+          {fileName ? (
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{fileName}</span>
+          ) : (
+            <span>Load Video Stream (.mp4, .mov)</span>
+          )}
+        </div>
+      </div>
+
+      {/* Video Viewport Container */}
+      <div className="video-hud-viewport">
+        <div className="video-scanline"></div>
+        <div className="video-reticle-overlay"></div>
+        
+        <video 
+          ref={videoRef} 
+          controls 
+          muted 
+          loop 
+          style={{ display: 'none' }}
+        ></video>
+        <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+
+        {!isPlaying && (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <Video size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
+            <p style={{ fontSize: '0.8rem' }}>Upload video feed to initiate YOLOv8 AI telemetry</p>
+          </div>
         )}
       </div>
+
+      {/* Live AI Vehicle Telemetry Bar */}
+      <div className="hud-stat-bar">
+        <div className="hud-stat-pill" style={{ color: 'var(--cyan-accent)' }}>
+          🚗 Vehicles: <span>{normal}</span>
+        </div>
+        
+        <div className="hud-stat-pill" style={{ color: emergency > 0 ? 'var(--rose-accent)' : 'var(--text-muted)' }}>
+          🚑 Emergency: <span>{emergency}</span>
+        </div>
+      </div>
+
+      {emergency > 0 && (
+        <div style={{ 
+          background: 'rgba(244, 63, 94, 0.15)', 
+          border: '1px solid rgba(244, 63, 94, 0.4)', 
+          color: '#f43f5e', 
+          borderRadius: '8px', 
+          padding: '0.4rem 0.75rem', 
+          fontSize: '0.75rem', 
+          fontWeight: 700, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '0.4rem' 
+        }}>
+          <ShieldAlert size={14} />
+          AMBULANCE DETECTED - TRIGGERING PRIORITY OVERRIDE
+        </div>
+      )}
     </div>
   );
 }

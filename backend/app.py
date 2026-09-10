@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Threading doesn't play well when debugging is enabled locally.
     print("""
     ========================================================
-     🚦 AI Traffic Flow Engine API running precisely on
+      AI Traffic Flow Engine API running on
         => http://localhost:5000
     ========================================================
     """)

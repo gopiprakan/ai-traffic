@@ -2,10 +2,22 @@ import cv2
 import requests
 from ultralytics import YOLO
 
-# 1. Load the YOLOv5 Nano model which is highly optimized for CPUs (normal laptops).
-# Note: 'yolov5nu.pt' tells the Ultralytics engine to use YOLOv5 architecture.
-# It will automatically install the small weights file (approx 5MB) on first run.
-model = YOLO('yolov5nu.pt')
+# Lazy loaded model for local video processing
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        try:
+            import torch
+            # Allow safe globals for ultralytics in PyTorch 2.6+
+            if hasattr(torch.serialization, 'add_safe_globals'):
+                import ultralytics.nn.tasks
+                torch.serialization.add_safe_globals([ultralytics.nn.tasks.DetectionModel])
+        except Exception:
+            pass
+        model = YOLO('yolov5nu.pt')
+    return model
 
 # COCO dataset class IDs for vehicles:
 # 1: bicycle, 2: car, 3: motorcycle, 5: bus, 7: truck
@@ -87,7 +99,8 @@ if __name__ == "__main__":
 
         # 3. Run Inference on the frame
         # We restrict processing to `classes=VEHICLE_CLASSES` and a confidence threshold of `0.4`
-        results = model(frame, classes=VEHICLE_CLASSES, conf=0.4, verbose=False)
+        detector = get_model()
+        results = detector(frame, classes=VEHICLE_CLASSES, conf=0.4, verbose=False)
 
         # 4. Count vehicles
         # results[0].boxes contains all the detected bounding boxes

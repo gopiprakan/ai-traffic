@@ -42,7 +42,11 @@ class TrafficService:
                 self.current_green_lane = target_lane
             
             # 1st Socket Event specifically for Emergency Systems
-            socketio.emit("emergency_alert", {"lane": target_lane, "status": "active", "message": f"Priority vehicle detected in {target_lane}."})
+            try:
+                if socketio.server is not None:
+                    socketio.emit("emergency_alert", {"lane": target_lane, "status": "active", "message": f"Priority vehicle detected in {target_lane}."})
+            except Exception:
+                pass
         else:
             # End emergency mode
             self.emergency_mode = False
@@ -53,7 +57,11 @@ class TrafficService:
             self.lanes[self.current_green_lane]["timer"] = 5
             
             # Clear emergency event
-            socketio.emit("emergency_alert", {"lane": "none", "status": "resolved", "message": "Grid restored to AI Optimization Flow."})
+            try:
+                if socketio.server is not None:
+                    socketio.emit("emergency_alert", {"lane": "none", "status": "resolved", "message": "Grid restored to AI Optimization Flow."})
+            except Exception:
+                pass
             
         # 2nd routine Socket Event updating the entire state tree
         self._push_update()
@@ -67,7 +75,11 @@ class TrafficService:
 
     def _push_update(self):
         """Emit state to all connected frontends."""
-        socketio.emit("traffic_update", self.lanes)
+        try:
+            if socketio.server is not None:
+                socketio.emit("traffic_update", self.lanes)
+        except Exception:
+            pass
 
     def _controller_loop(self):
         """The AI State Engine - Constantly loops and shifts lights in the background."""
